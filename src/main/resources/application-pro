@@ -1,0 +1,4 @@
+facecard:
+  faceServer: http://localhost:3000/action
+  user: admin
+  password: admin

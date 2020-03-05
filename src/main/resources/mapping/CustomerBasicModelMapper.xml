@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.gooa.facecard.mapper.CustomerBasicModelMapper">
+  <resultMap id="BaseResultMap" type="cc.gooa.facecard.model.CustomerBasicModel">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="schoolId" jdbcType="INTEGER" property="schoolid" />
+    <result column="SID" jdbcType="INTEGER" property="sid" />
+    <result column="role" jdbcType="INTEGER" property="role" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="pass" jdbcType="VARCHAR" property="pass" />
+    <result column="salt" jdbcType="VARCHAR" property="salt" />
+    <result column="sex" jdbcType="CHAR" property="sex" />
+    <result column="schoolName" jdbcType="VARCHAR" property="schoolname" />
+    <result column="tel" jdbcType="VARCHAR" property="tel" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="sug" jdbcType="VARCHAR" property="sug" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createtime" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="card" jdbcType="VARCHAR" property="card" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cc.gooa.facecard.model.CustomerBasicModel">
+    <result column="photo" jdbcType="LONGVARBINARY" property="photo" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    a.id, a.schoolId, a.SID, a.role, a.code, a.phone, a.name, a.pass, a.salt, a.sex, a.schoolName, a.tel, a.remark,
+    a.sug, a.address, a.createTime, a.status
+  </sql>
+  <sql id="Blob_Column_List">
+    photo
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from b_customer_basic
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    ,
+    b.card
+    from b_customer_basic a
+    left join b_busi_cards b
+    on a.code = b.customerCode
+    where a.`status` = 1
+    and a.schoolId = #{param3, jdbcType=INTEGER}
+    and  a.photo is not null
+    limit #{param1,jdbcType=INTEGER}
+    offset #{param2,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectCountAll" resultType="int" >
+    select
+    count(1)
+    from b_customer_basic where `status` = 1 and  photo is not null
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from b_customer_basic
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cc.gooa.facecard.model.CustomerBasicModel">
+    insert into b_customer_basic (id, schoolId, SID, 
+      role, code, phone,
+      name, pass, salt, sex, 
+      schoolName, tel, remark, 
+      sug, address, createTime, 
+      status, photo)
+    values (#{id,jdbcType=INTEGER}, #{schoolid,jdbcType=INTEGER}, #{sid,jdbcType=INTEGER}, 
+      #{role,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{pass,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR}, #{sex,jdbcType=CHAR}, 
+      #{schoolname,jdbcType=VARCHAR}, #{tel,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, 
+      #{sug,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{status,jdbcType=INTEGER}, #{photo,jdbcType=LONGVARBINARY})
+  </insert>
+  <insert id="insertSelective" parameterType="cc.gooa.facecard.model.CustomerBasicModel">
+    insert into b_customer_basic
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="schoolid != null">
+        schoolId,
+      </if>
+      <if test="sid != null">
+        SID,
+      </if>
+      <if test="role != null">
+        role,
+      </if>
+      <if test="code != null">
+        code,
+      </if>
+      <if test="phone != null">
+        phone,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="pass != null">
+        pass,
+      </if>
+      <if test="salt != null">
+        salt,
+      </if>
+      <if test="sex != null">
+        sex,
+      </if>
+      <if test="schoolname != null">
+        schoolName,
+      </if>
+      <if test="tel != null">
+        tel,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="sug != null">
+        sug,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="createtime != null">
+        createTime,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="photo != null">
+        photo,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="schoolid != null">
+        #{schoolid,jdbcType=INTEGER},
+      </if>
+      <if test="sid != null">
+        #{sid,jdbcType=INTEGER},
+      </if>
+      <if test="role != null">
+        #{role,jdbcType=INTEGER},
+      </if>
+      <if test="code != null">
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="pass != null">
+        #{pass,jdbcType=VARCHAR},
+      </if>
+      <if test="salt != null">
+        #{salt,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        #{sex,jdbcType=CHAR},
+      </if>
+      <if test="schoolname != null">
+        #{schoolname,jdbcType=VARCHAR},
+      </if>
+      <if test="tel != null">
+        #{tel,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="sug != null">
+        #{sug,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null">
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="photo != null">
+        #{photo,jdbcType=LONGVARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cc.gooa.facecard.model.CustomerBasicModel">
+    update b_customer_basic
+    <set>
+      <if test="schoolid != null">
+        schoolId = #{schoolid,jdbcType=INTEGER},
+      </if>
+      <if test="sid != null">
+        SID = #{sid,jdbcType=INTEGER},
+      </if>
+      <if test="role != null">
+        role = #{role,jdbcType=INTEGER},
+      </if>
+      <if test="code != null">
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="pass != null">
+        pass = #{pass,jdbcType=VARCHAR},
+      </if>
+      <if test="salt != null">
+        salt = #{salt,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        sex = #{sex,jdbcType=CHAR},
+      </if>
+      <if test="schoolname != null">
+        schoolName = #{schoolname,jdbcType=VARCHAR},
+      </if>
+      <if test="tel != null">
+        tel = #{tel,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="sug != null">
+        sug = #{sug,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null">
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="photo != null">
+        photo = #{photo,jdbcType=LONGVARBINARY},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="cc.gooa.facecard.model.CustomerBasicModel">
+    update b_customer_basic
+    set schoolId = #{schoolid,jdbcType=INTEGER},
+      SID = #{sid,jdbcType=INTEGER},
+      role = #{role,jdbcType=INTEGER},
+      code = #{code,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      pass = #{pass,jdbcType=VARCHAR},
+      salt = #{salt,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=CHAR},
+      schoolName = #{schoolname,jdbcType=VARCHAR},
+      tel = #{tel,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      sug = #{sug,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=INTEGER},
+      photo = #{photo,jdbcType=LONGVARBINARY}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cc.gooa.facecard.model.CustomerBasicModel">
+    update b_customer_basic
+    set schoolId = #{schoolid,jdbcType=INTEGER},
+      SID = #{sid,jdbcType=INTEGER},
+      role = #{role,jdbcType=INTEGER},
+      code = #{code,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      pass = #{pass,jdbcType=VARCHAR},
+      salt = #{salt,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=CHAR},
+      schoolName = #{schoolname,jdbcType=VARCHAR},
+      tel = #{tel,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      sug = #{sug,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

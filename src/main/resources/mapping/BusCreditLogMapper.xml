@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.gooa.facecard.mapper.BusCreditLogMapper">
+  <resultMap id="BaseResultMap" type="cc.gooa.facecard.model.BusCreditLog">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="customerCode" jdbcType="VARCHAR" property="customercode" />
+    <result column="card" jdbcType="VARCHAR" property="card" />
+    <result column="deviceCode" jdbcType="VARCHAR" property="devicecode" />
+    <result column="creditTime" jdbcType="TIMESTAMP" property="credittime" />
+    <result column="uploadTime" jdbcType="TIMESTAMP" property="uploadtime" />
+    <result column="orient" jdbcType="VARCHAR" property="orient" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cc.gooa.facecard.model.BusCreditLog">
+    <result column="pict" jdbcType="LONGVARBINARY" property="pict" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, customerCode, card, deviceCode, creditTime, uploadTime, orient, status
+  </sql>
+  <sql id="Blob_Column_List">
+    pict
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from b_busi_credit_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from b_busi_credit_log
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cc.gooa.facecard.model.BusCreditLog">
+    insert into b_busi_credit_log (id, customerCode, card, 
+      deviceCode, creditTime, uploadTime, 
+      orient, status, pict
+      )
+    values (#{id,jdbcType=INTEGER}, #{customercode,jdbcType=VARCHAR}, #{card,jdbcType=VARCHAR}, 
+      #{devicecode,jdbcType=VARCHAR}, #{credittime,jdbcType=TIMESTAMP}, #{uploadtime,jdbcType=TIMESTAMP}, 
+      #{orient,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{pict,jdbcType=LONGVARBINARY}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cc.gooa.facecard.model.BusCreditLog">
+    insert into b_busi_credit_log
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="customercode != null">
+        customerCode,
+      </if>
+      <if test="card != null">
+        card,
+      </if>
+      <if test="devicecode != null">
+        deviceCode,
+      </if>
+      <if test="credittime != null">
+        creditTime,
+      </if>
+      <if test="uploadtime != null">
+        uploadTime,
+      </if>
+      <if test="orient != null">
+        orient,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="pict != null">
+        pict,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="customercode != null">
+        #{customercode,jdbcType=VARCHAR},
+      </if>
+      <if test="card != null">
+        #{card,jdbcType=VARCHAR},
+      </if>
+      <if test="devicecode != null">
+        #{devicecode,jdbcType=VARCHAR},
+      </if>
+      <if test="credittime != null">
+        #{credittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="uploadtime != null">
+        #{uploadtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="orient != null">
+        #{orient,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="pict != null">
+        #{pict,jdbcType=LONGVARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cc.gooa.facecard.model.BusCreditLog">
+    update b_busi_credit_log
+    <set>
+      <if test="customercode != null">
+        customerCode = #{customercode,jdbcType=VARCHAR},
+      </if>
+      <if test="card != null">
+        card = #{card,jdbcType=VARCHAR},
+      </if>
+      <if test="devicecode != null">
+        deviceCode = #{devicecode,jdbcType=VARCHAR},
+      </if>
+      <if test="credittime != null">
+        creditTime = #{credittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="uploadtime != null">
+        uploadTime = #{uploadtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="orient != null">
+        orient = #{orient,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="pict != null">
+        pict = #{pict,jdbcType=LONGVARBINARY},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="cc.gooa.facecard.model.BusCreditLog">
+    update b_busi_credit_log
+    set customerCode = #{customercode,jdbcType=VARCHAR},
+      card = #{card,jdbcType=VARCHAR},
+      deviceCode = #{devicecode,jdbcType=VARCHAR},
+      creditTime = #{credittime,jdbcType=TIMESTAMP},
+      uploadTime = #{uploadtime,jdbcType=TIMESTAMP},
+      orient = #{orient,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      pict = #{pict,jdbcType=LONGVARBINARY}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cc.gooa.facecard.model.BusCreditLog">
+    update b_busi_credit_log
+    set customerCode = #{customercode,jdbcType=VARCHAR},
+      card = #{card,jdbcType=VARCHAR},
+      deviceCode = #{devicecode,jdbcType=VARCHAR},
+      creditTime = #{credittime,jdbcType=TIMESTAMP},
+      uploadTime = #{uploadtime,jdbcType=TIMESTAMP},
+      orient = #{orient,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
