@@ -1,7 +1,7 @@
 package cc.gooa.facecard.service.impl;
 
-import cc.gooa.facecard.bean.DeviceInfo;
-import cc.gooa.facecard.bean.FaceServerData;
+import cc.gooa.facecard.base.DeviceInfo;
+import cc.gooa.facecard.base.FaceServerData;
 import cc.gooa.facecard.service.FaceServerLinkService;
 import cc.gooa.facecard.utils.RequestFaceServer;
 import com.alibaba.fastjson.JSON;
@@ -24,13 +24,14 @@ public class FaceServerLinkServiceImpl  implements FaceServerLinkService {
     private RequestFaceServer requestFaceServer;
 
     @Override
-    public boolean connect() {
-        String faceServer = env.getProperty("facedevice.server");
-        logger.info("start connect to facedevice.server：" + faceServer);
+    public boolean connect(String faceServer) {
+        int reconnect = Integer.parseInt(env.getProperty("facecard.reconnect"));
+        String method = env.getProperty("facedevice.method.connect");
+        logger.info("start connect to facedevice.server: " + faceServer);
         OkHttpClient client = requestFaceServer.buildBasicAuthClient();
         RequestBody requestBody  = RequestBody.create(RequestFaceServer.MediaJSON, "");
         // 从env中获取连接方法，此处配置的是GetSysParam方法获取设备信息，可以更换
-        Request req = new Request.Builder().url(faceServer + env.getProperty("facedevice.method.connect")).post(requestBody).build();
+        Request req = new Request.Builder().url(faceServer + method).post(requestBody).build();
         Call call = client.newCall(req);
         try {
             Response res = call.execute();
@@ -48,17 +49,25 @@ public class FaceServerLinkServiceImpl  implements FaceServerLinkService {
                 logger.info("----------Device Info----------");
                 return true;
             } else {
-                logger.error("Failed to connect facedevice.server because => " + resBody);
-                return false;
+                logger.error("Failed to connect facedevice.server because => " + resBody + " " + reconnect + "s后重新连接");
+                Thread.sleep(reconnect * 1000);
+                return this.connect(faceServer);
             }
         } catch (Exception e) {
             logger.error(e.toString());
+            logger.error(reconnect + "s later try to reconnect");
+            try {
+                Thread.sleep(reconnect * 1000);
+                return this.connect(faceServer);
+            } catch (Exception e1 ) {
+                e1.printStackTrace();
+            }
         }
         return false;
     }
 
     @Override
-    public void subscribe() {
+    public void subscribe(String faceServer) {
         logger.info(" try to subscribe heartbeat and verify data");
         // 订阅方法
         String method = env.getProperty("facedevice.method.subscribe");
@@ -94,7 +103,7 @@ public class FaceServerLinkServiceImpl  implements FaceServerLinkService {
 
         FaceServerData data  = new FaceServerData(method, postData);
         try {
-            JSONObject json =  requestFaceServer.request(method, JSON.toJSONString(data));
+            JSONObject json =  requestFaceServer.request(faceServer, method, JSON.toJSONString(data));
             if (json !=null && "200".equals(json.getString("code"))) {
                 logger.info("success subscribed!");
             } else {

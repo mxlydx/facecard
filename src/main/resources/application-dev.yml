@@ -1,17 +1,22 @@
 server:                                     # 系统配置
   port: 8088                                # 端口
-
-
+executor-config:                            # 多线程配置
+  corePoolSize: 5
+  maxPoolSize: 10
+  queueCapacity: 100
+  keepAliveSeconds: 120
+  rejectedExecutionHandler: callerRunsPolicy # 拒绝策略 abortPolicy callerRunsPolicy discardOldestPolicy discardPolicy
 facecard:                                   # 本服务相关
   schoolId: 1                               # 学校id
-  server: http://localhost                  #
+  server: http://192.168.0.108              #
   subscribe:                                # 订阅相关
     heartbeat: heartbeat                    # 心跳地址
     verify: verify                          # 处理认证结果地址
   synoNum: 10                               # 单次同步个数，避免一次同步数据过大
+  reconnect: 10                             # 设备服务连接失败后重连时间 单位秒
 
 facedevice:                                 # 人脸识别设备服务
-  server: http://localhost:3000/action/     # 服务地址
+  server: http://192.168.0.108:3000/action/,http://192.168.0.108:3000/action/ # 服务地址
   user: admin                               # 服务认证：用户名
   password: admin                           # 服务认证: 密码
   method:                                   # 具体请求方法

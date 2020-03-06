@@ -1,6 +1,6 @@
 package cc.gooa.facecard.controller;
 
-import cc.gooa.facecard.bean.SuccessResponse;
+import cc.gooa.facecard.base.SuccessResponse;
 import cc.gooa.facecard.model.BusCreditLog;
 import cc.gooa.facecard.service.BusCreditLogService;
 import com.alibaba.fastjson.JSON;

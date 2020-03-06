@@ -1,8 +1,6 @@
-package cc.gooa.facecard.bean;
+package cc.gooa.facecard.base;
 
 import com.alibaba.fastjson.JSON;
-
-import javax.servlet.http.HttpServletResponse;
 
 public class SuccessResponse  {
    private Object data;

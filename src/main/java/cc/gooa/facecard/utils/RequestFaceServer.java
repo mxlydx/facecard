@@ -22,9 +22,8 @@ public class RequestFaceServer {
     @Autowired
     private  Environment env;
 
-    public JSONObject request(String method, String data) {
+    public JSONObject request(String faceServer, String method, String data) {
         logger.info("start to request：" + method);
-        String faceServer = env.getProperty("facedevice.server");
         OkHttpClient client = buildBasicAuthClient();
         RequestBody requestBody;
         if (data != null) {

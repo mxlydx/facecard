@@ -1,0 +1,9 @@
+version: "2"
+services:
+  facecard:
+    image: gooa.cc/facecard:latest
+    command: sh bin/start_from_docker.sh
+    ports:
+      - "8088:8088"
+    container_name: facecard
+    restart: always

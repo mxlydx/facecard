@@ -1,4 +1,57 @@
-facecard:
-  faceServer: http://localhost:3000/action
-  user: admin
-  password: admin
+server:                                     # 系统配置
+  port: 8098                                # 端口
+
+
+facecard:                                   # 本服务相关
+  schoolId: 1                               # 学校id
+  server: http://192.168.0.108              #
+  subscribe:                                # 订阅相关
+    heartbeat: heartbeat                    # 心跳地址
+    verify: verify                          # 处理认证结果地址
+  synoNum: 10                               # 单次同步个数，避免一次同步数据过大
+  reconnect: 10                             # 设备服务连接失败后重连时间 单位秒
+
+facedevice:                                 # 人脸识别设备服务
+  server: http://192.168.0.108:3000/action/ # 服务地址
+  user: admin                               # 服务认证：用户名
+  password: admin                           # 服务认证: 密码
+  method:                                   # 具体请求方法
+    connect: GetSysParam                    # 获取设备信息
+    subscribe: Subscribe                    # 数据订阅
+    heartbeat: HeartBeat                    # 心跳
+    addperson: AddPerson                    # 添加单个用户
+spring:
+  datasource:
+    name: dev
+    url: jdbc:mysql://admin.ailong8.com:3306/xxpx?serverTimezone=GMT%2B8
+    type: com.alibaba.druid.pool.DruidDataSource
+    username: xxpx
+    password: xxpx4306
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    filters: stat
+    maxActive: 20
+    initialSize: 1
+    maxWait: 60000
+    minIdle: 1
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 20
+  redis:
+    # redis数据库索引（默认为0），我们使用索引为3的数据库，避免和其他数据库冲突
+    database: 3
+    # redis服务器地址（默认为localhost）
+    host: 192.168.0.108
+    # redis端口（默认为6379）
+    port: 6379
+    # redis访问密码（默认为空）
+    password: 123456
+    # redis连接超时时间（单位为毫秒）
+    timeout: 5000
+mybatis:
+  mapper-locations: classpath:mapping/*.xml  #注意：一定要对应mapper映射xml文件的所在路径
+  type-aliases-package: cc.gooa.facecard.model  # 注意：对应实体类的路径

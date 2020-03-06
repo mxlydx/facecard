@@ -1,4 +1,4 @@
-package cc.gooa.facecard.bean;
+package cc.gooa.facecard.base;
 
 import com.alibaba.fastjson.JSONObject;
 

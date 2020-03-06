@@ -1,8 +1,8 @@
 package cc.gooa.facecard.service.impl;
 
-import cc.gooa.facecard.bean.DeviceInfo;
-import cc.gooa.facecard.bean.FaceServerData;
-import cc.gooa.facecard.bean.RedisKey;
+import cc.gooa.facecard.base.DeviceInfo;
+import cc.gooa.facecard.base.FaceServerData;
+import cc.gooa.facecard.base.RedisKey;
 import cc.gooa.facecard.mapper.CustomerBasicModelMapper;
 import cc.gooa.facecard.model.CustomerBasicModel;
 import cc.gooa.facecard.service.CustomerBasicModelService;
@@ -15,10 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.List;
+
 
 @Service
 public class CustomerBasicModelServiceImpl implements CustomerBasicModelService {
@@ -32,7 +34,8 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
     private RequestFaceServer requestFaceServer;
 
     @Override
-    public void synoData() {
+    @Async("asyncExecutor")
+    public void synoData(String faceServer) {
         long start = System.currentTimeMillis();
         int all = customerBasicModelMapper.selectCountAll();
         int schoolId = Integer.parseInt(env.getProperty("facecard.schoolId"));
@@ -51,7 +54,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
                 try {
                     if (RedisUtil.getValue(RedisKey.SYNOED_IDS.getKey() + model.getId()) == null) {
                         logger.info("同步id：【" + model.getId() + "】——【" + model.getName() + "】ing...");
-                        this.postData2FaceDevice(model);
+                        this.postData2FaceDevice(faceServer,model);
                     } else {
                         logger.info("id：【" + model.getId() + "】——【" + model.getName() + "】has posted now skip!!! ");
                     }
@@ -67,7 +70,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
         logger.info("共计用时: " + (end - start) / 1000 + "s");
     }
 
-    public void postData2FaceDevice(CustomerBasicModel model) {
+    public void postData2FaceDevice(String faceServer, CustomerBasicModel model) {
         String method = env.getProperty("facedevice.method.addperson");
         // 组织请求信息
         JSONObject info = new JSONObject();
@@ -102,7 +105,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
         //
         long requestStart = System.currentTimeMillis();
         try {
-            JSONObject json = requestFaceServer.request(method, JSON.toJSONString(postData));
+            JSONObject json = requestFaceServer.request(faceServer,method, JSON.toJSONString(postData));
             if (json != null && "200".equals(json.getString("code"))) {
                 logger.info("同步成功，用时" + (System.currentTimeMillis() - requestStart) / 1000 + "s");
                 // 设置同步成功标识，下次不在同步
