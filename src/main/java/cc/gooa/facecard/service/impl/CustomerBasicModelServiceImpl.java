@@ -1,6 +1,5 @@
 package cc.gooa.facecard.service.impl;
 
-import cc.gooa.facecard.base.DeviceInfo;
 import cc.gooa.facecard.base.FaceServerData;
 import cc.gooa.facecard.base.RedisKey;
 import cc.gooa.facecard.mapper.CustomerBasicModelMapper;
@@ -35,7 +34,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
 
     @Override
     @Async("asyncExecutor")
-    public void synoData(String faceServer) {
+    public void synoData(String faceServer, String deviceId) {
         long start = System.currentTimeMillis();
         int all = customerBasicModelMapper.selectCountAll();
         int schoolId = Integer.parseInt(env.getProperty("facecard.schoolId"));
@@ -54,7 +53,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
                 try {
                     if (RedisUtil.getValue(RedisKey.SYNOED_IDS.getKey() + model.getId()) == null) {
                         logger.info("同步id：【" + model.getId() + "】——【" + model.getName() + "】ing...");
-                        this.postData2FaceDevice(faceServer,model);
+                        this.postData2FaceDevice(faceServer,model, deviceId);
                     } else {
                         logger.info("id：【" + model.getId() + "】——【" + model.getName() + "】has posted now skip!!! ");
                     }
@@ -70,11 +69,11 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
         logger.info("共计用时: " + (end - start) / 1000 + "s");
     }
 
-    public void postData2FaceDevice(String faceServer, CustomerBasicModel model) {
+    public void postData2FaceDevice(String faceServer, CustomerBasicModel model, String deviceId) {
         String method = env.getProperty("facedevice.method.addperson");
         // 组织请求信息
         JSONObject info = new JSONObject();
-        info.put("DeviceID", DeviceInfo.getInstance().getDeviceId());
+        info.put("DeviceID", deviceId);
         // 名单类型： 0: 白名单
         info.put("PersonType", 0);
         // 姓名

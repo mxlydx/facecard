@@ -45,7 +45,7 @@ public class ExecutorConfig {
                 executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
                 break;
             case "discardPolicy":
-                executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
+                executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
                 break;
             default:
                 executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());

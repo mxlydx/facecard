@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.env.Environment;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 
@@ -41,10 +40,10 @@ public class InitConfigLoader implements ApplicationRunner {
      * @param faceServer
      */
     public void connectDevice(String faceServer) {
-        boolean success =  faceServerLinkService.connect(faceServer);
-        if (success) {
-            faceServerLinkService.subscribe(faceServer);
-            customerBasicModelService.synoData(faceServer);
+        String deviceId =  faceServerLinkService.connect(faceServer);
+        if (deviceId != null) {
+            faceServerLinkService.subscribe(faceServer, deviceId);
+            customerBasicModelService.synoData(faceServer, deviceId);
         } else {
             logger.info("failed to connect");
         }

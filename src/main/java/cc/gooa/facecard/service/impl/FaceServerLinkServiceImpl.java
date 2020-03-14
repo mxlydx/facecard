@@ -24,7 +24,7 @@ public class FaceServerLinkServiceImpl  implements FaceServerLinkService {
     private RequestFaceServer requestFaceServer;
 
     @Override
-    public boolean connect(String faceServer) {
+    public String connect(String faceServer) {
         int reconnect = Integer.parseInt(env.getProperty("facecard.reconnect"));
         String method = env.getProperty("facedevice.method.connect");
         logger.info("start connect to facedevice.server: " + faceServer);
@@ -40,14 +40,15 @@ public class FaceServerLinkServiceImpl  implements FaceServerLinkService {
                 JSONObject json = JSON.parseObject(resBody);
                 DeviceInfo deviceInfo = DeviceInfo.getInstance();
                 JSONObject info = JSON.parseObject(json.getString("info"));
-                deviceInfo.setDeviceId(info.getString("DeviceID"));
+                String deviceId = info.getString("DeviceID");
+                deviceInfo.setDeviceId(deviceId);
                 deviceInfo.setName(info.getString("Name"));
                 deviceInfo.setVersion(info.getString("Version"));
                 logger.info("Success connected to " + faceServer);
                 logger.info("----------Device Info----------");
                 logger.info(json.toJSONString());
                 logger.info("----------Device Info----------");
-                return true;
+                return deviceId;
             } else {
                 logger.error("Failed to connect facedevice.server because => " + resBody + " " + reconnect + "s后重新连接");
                 Thread.sleep(reconnect * 1000);
@@ -63,19 +64,19 @@ public class FaceServerLinkServiceImpl  implements FaceServerLinkService {
                 e1.printStackTrace();
             }
         }
-        return false;
+        return null;
     }
 
     @Override
-    public void subscribe(String faceServer) {
+    public void subscribe(String faceServer, String deviceId) {
         logger.info(" try to subscribe heartbeat and verify data");
         // 订阅方法
         String method = env.getProperty("facedevice.method.subscribe");
         JSONObject info =  new JSONObject();
         // 获取设备信息
-        DeviceInfo deviceInfo = DeviceInfo.getInstance();
+        // DeviceInfo deviceInfo = DeviceInfo.getInstance();
         // 组织info查询信息
-        info.put("DeviceID", deviceInfo.getDeviceId());
+        info.put("DeviceID", deviceId);
         info.put("Num", 1);
         JSONArray topics = new JSONArray();
         // 订阅认证信息
