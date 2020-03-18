@@ -6,14 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 
 
 @Component
-public class InitConfigLoader implements ApplicationRunner {
+public class InitConfigLoader {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -23,8 +22,7 @@ public class InitConfigLoader implements ApplicationRunner {
     @Autowired
     Environment env;
 
-    @Override
-
+//    @Override
     public void run(ApplicationArguments args) throws Exception {
         String faceServers = env.getProperty("facedevice.server");
         if (faceServers !=null) {
@@ -43,7 +41,7 @@ public class InitConfigLoader implements ApplicationRunner {
         String deviceId =  faceServerLinkService.connect(faceServer);
         if (deviceId != null) {
             faceServerLinkService.subscribe(faceServer, deviceId);
-            customerBasicModelService.synoData(faceServer, deviceId);
+            customerBasicModelService.pushData(faceServer, deviceId);
         } else {
             logger.info("failed to connect");
         }

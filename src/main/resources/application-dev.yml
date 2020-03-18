@@ -1,5 +1,13 @@
 server:                                     # 系统配置
   port: 8088                                # 端口
+mqtt:
+  host: tcp://127.0.0.1:61613               # mqtt服务地址
+  clientId: gooa.cc.facecard                # 本服务的mqtt客户端id
+  topic: mqtt/face/                         # 下发名单的mqtt主题
+  username: admin                           # mqtt连接用户名
+  password: password                        # mqtt密码
+  timeout: 20
+  keepalive: 20
 executor-config:                            # 多线程配置
   corePoolSize: 5
   maxPoolSize: 10
@@ -24,6 +32,7 @@ facedevice:                                 # 人脸识别设备服务
     subscribe: Subscribe                    # 数据订阅
     heartbeat: HeartBeat                    # 心跳
     addperson: AddPerson                    # 添加单个用户
+  deviceIds: 1305433,1305434
 spring:
   datasource:
     name: dev

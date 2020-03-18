@@ -1,10 +1,14 @@
 package cc.gooa.facecard.service.impl;
 
 import cc.gooa.facecard.base.FaceServerData;
+import cc.gooa.facecard.base.MqttMessage;
+import cc.gooa.facecard.base.MqttUserInfo;
 import cc.gooa.facecard.base.RedisKey;
 import cc.gooa.facecard.mapper.CustomerBasicModelMapper;
 import cc.gooa.facecard.model.CustomerBasicModel;
 import cc.gooa.facecard.service.CustomerBasicModelService;
+import cc.gooa.facecard.service.FaceServerLinkService;
+import cc.gooa.facecard.utils.MqttUtil;
 import cc.gooa.facecard.utils.RedisUtil;
 import cc.gooa.facecard.utils.RequestFaceServer;
 import com.alibaba.fastjson.JSON;
@@ -31,10 +35,77 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
     private Environment env;
     @Autowired
     private RequestFaceServer requestFaceServer;
+    @Autowired
+    private FaceServerLinkService faceServerLinkService;
+
 
     @Override
     @Async("asyncExecutor")
-    public void synoData(String faceServer, String deviceId) {
+    public void pushData(String deviceId) {
+        long start = System.currentTimeMillis();
+        int all = customerBasicModelMapper.selectCountAll();
+        int schoolId = Integer.parseInt(env.getProperty("facecard.schoolId"));
+        long countEnd = System.currentTimeMillis();
+        logger.info("计数用时：" + (countEnd - start) / 1000 + "s");
+        int pageSize = Integer.parseInt(env.getProperty("facecard.synoNum")); // 单页数据量
+        int batch = all / pageSize + 1;
+        String topic = env.getProperty("mqtt.topic");
+        logger.info("共【" + all + "】条数据" + "分【" + batch + "】次同步；每次同步【" + pageSize + "】条");
+        for (int i = 0; i < batch; i++) {
+            logger.info("开始同步第【" + (i + 1) + "】次");
+            long batchStart = System.currentTimeMillis();
+            List<CustomerBasicModel> customerBasicModelList = customerBasicModelMapper.selectAll(pageSize, i * pageSize, schoolId);
+            long batchQueryEnd = System.currentTimeMillis();
+            logger.info("查询第" + (i + 1) + " 批用时：" + (batchQueryEnd - batchStart) / 1000 + "s");
+            for (CustomerBasicModel model : customerBasicModelList) {
+                try {
+                    if (RedisUtil.getValue(RedisKey.SYNOED_IDS.getKey() + deviceId + ":" + model.getCode()) == null) {
+                        logger.info("同步id：【" + model.getId() + "】——【" + model.getName() + "】ing...");
+                        MqttUtil.publish(topic + deviceId, calData(model));
+                    } else {
+                        logger.info("id：【" + model.getId() + "】——【" + model.getName() + "】has posted now skip!!! ");
+                    }
+                } catch (RedisCommandTimeoutException exception) {
+                    logger.info("redis 连接失败！ 请检查redis运行是否正常...");
+                }
+            }
+        }
+    }
+
+    /**
+     * 订阅回传信息，并向apollo发布人员名单信息
+     * @param reset 是否重新同步？是：不重复订阅
+     * @param deviceId
+     */
+    @Override
+    public void synoData(boolean reset, String deviceId) {
+        if (!reset) {
+            faceServerLinkService.subscribe(deviceId);
+        }
+        this.pushData(deviceId);
+    }
+
+    private String calData(CustomerBasicModel model) {
+        MqttMessage message = new MqttMessage();
+        int gender = 2;
+        if ("男".equals(model.getSex())) {
+            gender = 0;
+        }
+        if ("女".equals(model.getSex())) {
+            gender = 1;
+        }
+        MqttUserInfo user = new MqttUserInfo(model.getCode(), model.getName(), gender, Base64.getEncoder().encodeToString(model.getPhoto()));
+        message.setInfo(user);
+        message.setOperator("EditPerson");
+        return JSONObject.toJSONString(message);
+    }
+
+
+
+
+    @Override
+    @Async("asyncExecutor")
+    public void pushData(String faceServer, String deviceId) {
         long start = System.currentTimeMillis();
         int all = customerBasicModelMapper.selectCountAll();
         int schoolId = Integer.parseInt(env.getProperty("facecard.schoolId"));
@@ -68,6 +139,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
         long end = System.currentTimeMillis();
         logger.info("共计用时: " + (end - start) / 1000 + "s");
     }
+
 
     public void postData2FaceDevice(String faceServer, CustomerBasicModel model, String deviceId) {
         String method = env.getProperty("facedevice.method.addperson");
@@ -118,5 +190,24 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
         } finally {
             logger.info("finished request" + method);
         }
+    }
+
+    /**
+     * 指定用户加入
+     * @param id
+     */
+    @Override
+    public void addUser(int id) {
+        CustomerBasicModel model = customerBasicModelMapper.selectByPrimaryKey(id);
+        String deviceIds = env.getProperty("facedevice.deviceIds", String.class);
+        String topic = env.getProperty("mqtt.topic");
+        if (deviceIds != null && deviceIds.split(",").length > 0) {
+            String[] devices = deviceIds.split(",");
+            for (String deviceId: devices) {
+                MqttUtil.publish(topic + deviceId, calData(model));
+            }
+        }
+
+
     }
 }

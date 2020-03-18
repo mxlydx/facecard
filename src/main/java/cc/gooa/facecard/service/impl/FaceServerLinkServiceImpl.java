@@ -3,11 +3,13 @@ package cc.gooa.facecard.service.impl;
 import cc.gooa.facecard.base.DeviceInfo;
 import cc.gooa.facecard.base.FaceServerData;
 import cc.gooa.facecard.service.FaceServerLinkService;
+import cc.gooa.facecard.utils.MqttUtil;
 import cc.gooa.facecard.utils.RequestFaceServer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import okhttp3.*;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,5 +118,15 @@ public class FaceServerLinkServiceImpl  implements FaceServerLinkService {
         }
 
 
+    }
+
+    /**
+     * 订阅下发名单的回传信息
+     * @param deviceId
+     */
+    @Override
+    public void subscribe(String deviceId) {
+        String topic = env.getProperty("mqtt.topic");
+        MqttUtil.subscribe(topic + deviceId + "/Ack");
     }
 }

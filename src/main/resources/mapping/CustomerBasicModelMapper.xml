@@ -36,7 +36,7 @@
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
-    from b_customer_basic
+    from b_customer_basic a
     where id = #{id,jdbcType=INTEGER}
   </select>
   <select id="selectAll" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
