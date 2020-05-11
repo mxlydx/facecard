@@ -2,7 +2,6 @@ package cc.gooa.facecard.init;
 
 import cc.gooa.facecard.service.CustomerBasicModelService;
 import cc.gooa.facecard.service.FaceServerLinkService;
-import cc.gooa.facecard.utils.MqttUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Component;
  * mqtt启动器，想mqtt服务器发布数据
  */
 @Component
-public class ApplicationMqttDataLoader implements ApplicationRunner {
+public class ApplicationMqttDataLoader {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     Environment environment;
@@ -23,13 +22,16 @@ public class ApplicationMqttDataLoader implements ApplicationRunner {
     @Autowired
     private CustomerBasicModelService customerBasicModelService;
 
-    @Override
+//    @Override
     public void run(ApplicationArguments args) throws Exception {
+        // 获取设备id
         String deviceIds = environment.getProperty("facedevice.deviceIds", String.class);
+        // 获取学校id
+        String schoolId = environment.getProperty("facecard.schoolId", String.class);
         if (deviceIds != null) {
             String[] devices = deviceIds.split(",");
             for (String deviceId : devices) {
-                customerBasicModelService.synoData(false, deviceId);
+                customerBasicModelService.synoData(false, Integer.parseInt(schoolId), deviceId);
             }
         }
 

@@ -39,12 +39,42 @@ public class MqttUserInfo {
      * 性别
      */
     private int gender;
+    /**
+     * 卡号
+     */
+    private String idCard;
 
-    public MqttUserInfo (String customId, String name, int gender, String pic) {
+    /**
+     * 删除所有用户标志
+     */
+    private String deleteall;
+
+    public String getDeleteall() {
+        return deleteall;
+    }
+
+    public void setDeleteall(String deleteall) {
+        this.deleteall = deleteall;
+    }
+
+    /**
+     *
+     * @param customId
+     * @param name
+     * @param gender
+     * @param pic
+     * @param card
+     */
+
+    public MqttUserInfo (String customId, String name, int gender, String pic, String card) {
         this.customId = customId;
         this.name = name;
         this.gender = gender;
         this.pic = pic;
+        this.idCard = card;
+    }
+
+    public MqttUserInfo() {
     }
 
     public String getCustomId() {
@@ -101,5 +131,13 @@ public class MqttUserInfo {
 
     public void setGender(int gender) {
         this.gender = gender;
+    }
+
+    public String getIdCard() {
+        return idCard;
+    }
+
+    public void setIdCard(String idCard) {
+        this.idCard = idCard;
     }
 }

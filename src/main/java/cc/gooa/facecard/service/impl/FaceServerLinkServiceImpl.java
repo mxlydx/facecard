@@ -125,8 +125,14 @@ public class FaceServerLinkServiceImpl  implements FaceServerLinkService {
      * @param deviceId
      */
     @Override
-    public void subscribe(String deviceId) {
+    public void subscribeFaceAck(String deviceId) {
         String topic = env.getProperty("mqtt.topic");
         MqttUtil.subscribe(topic + deviceId + "/Ack");
+    }
+
+    @Override
+    public void subscribeFaceVerify(String deviceId) {
+        String topic = env.getProperty("mqtt.topic");
+        MqttUtil.subscribe(topic + deviceId + "/Rec");
     }
 }

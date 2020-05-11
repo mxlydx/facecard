@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class MqttUtil {
     static Logger logger = LoggerFactory.getLogger(MqttUtil.class);
-    static MqttClient client = SpringContext.getBean("mqttClient", MqttClient.class);
+    public static MqttClient client = SpringContext.getBean("mqttClient", MqttClient.class);
     /**
      * 发布，默认qos为0，非持久化
      *

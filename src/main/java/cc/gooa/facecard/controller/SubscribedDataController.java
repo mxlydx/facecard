@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,20 +27,23 @@ public class SubscribedDataController {
 
     @RequestMapping(value = "/verify", method = RequestMethod.POST)
     @ResponseBody
-    public String receiveLogData(@RequestBody Object data, HttpServletRequest request, HttpServletResponse response) {
-        JSONObject json = (JSONObject) JSON.toJSON(data);
+    public String receiveLogData(@RequestBody Object data, HttpServletRequest request, HttpServletResponse response) throws Exception{
+        JSONObject toData = (JSONObject) JSON.toJSON(data);
+        JSONObject json = toData.getJSONObject("info");
         // 组织入库bean
         BusCreditLog bean = new BusCreditLog();
         bean.setCustomercode(json.getString("PersonUUID"));
         bean.setCard(json.getString("IdCard"));
         bean.setDevicecode(json.getString("DeviceID"));
-        String base64 = json.getString("SanpPic");
+        String base64 = toData.getString("SanpPic");
         if (base64 != null) {
-            bean.setPict(Base64.getDecoder().decode(base64));
+            base64 = base64.substring(base64.indexOf(",") + 1 , base64.length() - 1);
+            if (Base64.isBase64(base64))
+             bean.setPict(Base64.decodeBase64(base64));
         }
         Date creditTime = new Date();
         try {
-            creditTime =  json.getDate("ValidBegin");
+            creditTime =  json.getDate("CreateTime");
         } catch (Exception e) {
             logger.error("get ValidBegin to date error ");
         }
@@ -55,7 +57,6 @@ public class SubscribedDataController {
         } catch (Exception e) {
             e.printStackTrace();
             res.put("desc", "FAILED");
-            e.printStackTrace();
             logger.error(e.getMessage());
         } finally {
 

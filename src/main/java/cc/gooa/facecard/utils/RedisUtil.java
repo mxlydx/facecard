@@ -37,7 +37,6 @@ public class RedisUtil {
 		}
 		return result;
 	}
-
 	/**
 	 * 取得key的值，value为String类型的
 	 * @param key

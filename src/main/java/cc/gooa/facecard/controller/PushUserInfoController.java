@@ -1,5 +1,6 @@
 package cc.gooa.facecard.controller;
 
+import cc.gooa.facecard.base.BadRequestResponse;
 import cc.gooa.facecard.base.SuccessResponse;
 import cc.gooa.facecard.service.CustomerBasicModelService;
 import org.slf4j.Logger;
@@ -30,29 +31,53 @@ public class PushUserInfoController {
      */
     @RequestMapping(value = "/addUser", method = RequestMethod.GET)
     @ResponseBody
-    public String addUser(@RequestParam int id, HttpServletRequest request, HttpServletResponse response) {
+    public Object addUser(@RequestParam int id, @RequestParam String deviceIds,HttpServletRequest request, HttpServletResponse response) {
         logger.info("addUser request start");
-        customerBasicModelService.addUser(id);
-        return new SuccessResponse("OK").toString();
+        customerBasicModelService.addUser(id, deviceIds);
+        return new SuccessResponse("OK");
+    }
+
+    @RequestMapping(value = "/deleteUser", method = RequestMethod.GET)
+    @ResponseBody
+    public Object deleteUser(@RequestParam int id, @RequestParam String deviceIds,HttpServletRequest request, HttpServletResponse response) {
+        logger.info("delete request start");
+        customerBasicModelService.deleteUser(id, deviceIds);
+        return new SuccessResponse("OK");
     }
 
     /**
-     * 重新同步用户
+     * 同步用户
      * @param request
      * @param response
      * @return
      */
     @RequestMapping(value = "/synoUser", method = RequestMethod.GET)
     @ResponseBody
-    public String pushUserInfo(HttpServletRequest request, HttpServletResponse response) {
+    public Object pushUserInfo(@RequestParam int schoolId, @RequestParam String deviceIds, HttpServletRequest request, HttpServletResponse response) {
         logger.info("synoUser request start");
-        String deviceIds = environment.getProperty("facedevice.deviceIds", String.class);
         if (deviceIds != null) {
             String[] devices = deviceIds.split(",");
             for (String deviceId : devices) {
-                customerBasicModelService.synoData(true,deviceId);
+                customerBasicModelService.synoData(false, schoolId, deviceId);
             }
+        } else {
+            return new BadRequestResponse("Param Error").toString();
         }
-        return new SuccessResponse("OK").toString();
+        return new SuccessResponse("OK");
+    }
+
+    /**
+     *
+     * @param deviceIds
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/deleteAllUser", method = RequestMethod.GET)
+    @ResponseBody
+    public Object deleteAllUser(@RequestParam String deviceIds,HttpServletRequest request, HttpServletResponse response) {
+        logger.info("delete All request start");
+        customerBasicModelService.deleteAllUser(deviceIds);
+        return new SuccessResponse("OK");
     }
 }

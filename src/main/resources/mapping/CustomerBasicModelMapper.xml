@@ -55,7 +55,19 @@
     limit #{param1,jdbcType=INTEGER}
     offset #{param2,jdbcType=INTEGER}
   </select>
-
+  <select id="selectMan" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    ,
+    b.card
+    from b_customer_basic a
+    left join b_busi_cards b
+    on a.code = b.customerCode
+    where a.`status` = 1
+    and a.name = 'Man'
+  </select>
   <select id="selectCountAll" resultType="int" >
     select
     count(1)

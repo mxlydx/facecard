@@ -21,7 +21,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
+import org.apache.commons.codec.binary.Base64;
+
 import java.util.List;
 
 
@@ -41,32 +42,50 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
 
     @Override
     @Async("asyncExecutor")
-    public void pushData(String deviceId) {
+    public void pushDataBySchool(int schoolId, String deviceId) {
         long start = System.currentTimeMillis();
         int all = customerBasicModelMapper.selectCountAll();
-        int schoolId = Integer.parseInt(env.getProperty("facecard.schoolId"));
         long countEnd = System.currentTimeMillis();
         logger.info("计数用时：" + (countEnd - start) / 1000 + "s");
         int pageSize = Integer.parseInt(env.getProperty("facecard.synoNum")); // 单页数据量
         int batch = all / pageSize + 1;
         String topic = env.getProperty("mqtt.topic");
         logger.info("共【" + all + "】条数据" + "分【" + batch + "】次同步；每次同步【" + pageSize + "】条");
+//        for (int i = 0; i < 1; i++) {
         for (int i = 0; i < batch; i++) {
             logger.info("开始同步第【" + (i + 1) + "】次");
             long batchStart = System.currentTimeMillis();
             List<CustomerBasicModel> customerBasicModelList = customerBasicModelMapper.selectAll(pageSize, i * pageSize, schoolId);
+//            List<CustomerBasicModel> customerBasicModelList = customerBasicModelMapper.selectMan();
             long batchQueryEnd = System.currentTimeMillis();
             logger.info("查询第" + (i + 1) + " 批用时：" + (batchQueryEnd - batchStart) / 1000 + "s");
             for (CustomerBasicModel model : customerBasicModelList) {
                 try {
-                    if (RedisUtil.getValue(RedisKey.SYNOED_IDS.getKey() + deviceId + ":" + model.getCode()) == null) {
+                    String key = RedisKey.SYNOED_IDS.getKey() + deviceId + ":" + model.getCode();
+                    Object value = RedisUtil.getValue(key);
+                    if ( value == null) {
                         logger.info("同步id：【" + model.getId() + "】——【" + model.getName() + "】ing...");
-                        MqttUtil.publish(topic + deviceId, calData(model));
+                        boolean online = RequestFaceServer.isHostConnectable("192.168.2.10", 80);
+                        if (online) {
+                            MqttUtil.publish(topic + deviceId, calData(model, "EditPerson"));
+                        } else {
+                            while (!online) {
+                                logger.info(deviceId + "is offline, waiting it restart");
+                                Thread.sleep(20000);
+                                online = RequestFaceServer.isReachable("192.168.2.10");
+                            }
+                            MqttUtil.publish(topic + deviceId, calData(model, "EditPerson"));
+                        }
+
                     } else {
                         logger.info("id：【" + model.getId() + "】——【" + model.getName() + "】has posted now skip!!! ");
                     }
                 } catch (RedisCommandTimeoutException exception) {
-                    logger.info("redis 连接失败！ 请检查redis运行是否正常...");
+                    exception.printStackTrace();
+                    logger.info("Can't connect to Redis...");
+                }catch (InterruptedException iException) {
+                    iException.printStackTrace();
+                    logger.info("Thread was Interrupted");
                 }
             }
         }
@@ -75,17 +94,18 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
     /**
      * 订阅回传信息，并向apollo发布人员名单信息
      * @param reset 是否重新同步？是：不重复订阅
-     * @param deviceId
+     * @param schoolId 学校id
+     * @param deviceId 学校的设备id
      */
     @Override
-    public void synoData(boolean reset, String deviceId) {
+    public void synoData(boolean reset, int schoolId, String deviceId) {
         if (!reset) {
-            faceServerLinkService.subscribe(deviceId);
+            faceServerLinkService.subscribeFaceAck(deviceId);
         }
-        this.pushData(deviceId);
+        this.pushDataBySchool(schoolId, deviceId);
     }
 
-    private String calData(CustomerBasicModel model) {
+    private String calData(CustomerBasicModel model, String operator) {
         MqttMessage message = new MqttMessage();
         int gender = 2;
         if ("男".equals(model.getSex())) {
@@ -94,9 +114,24 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
         if ("女".equals(model.getSex())) {
             gender = 1;
         }
-        MqttUserInfo user = new MqttUserInfo(model.getCode(), model.getName(), gender, Base64.getEncoder().encodeToString(model.getPhoto()));
+        if ("Man".equals(model.getName())) {
+            model.setCard("0000000");
+        }
+        MqttUserInfo user = null;
+        switch (operator) {
+            case "EditPerson":
+                user = new MqttUserInfo(model.getCode(), model.getName(), gender, Base64.encodeBase64String(model.getPhoto()), model.getCard());
+                break;
+            case "DelPerson":
+                user = new MqttUserInfo();
+                user.setCustomId(model.getCode());
+                break;
+            case "DeleteAllPerson":
+                user = new MqttUserInfo();
+                user.setDeleteall("1");
+        }
         message.setInfo(user);
-        message.setOperator("EditPerson");
+        message.setOperator(operator);
         return JSONObject.toJSONString(message);
     }
 
@@ -166,7 +201,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
         // 手机号
         info.put("Telnum", model.getPhone());
         // 考勤图片
-        info.put("picinfo", Base64.getEncoder().encodeToString(model.getPhoto()));
+        info.put("picinfo", Base64.encodeBase64String(model.getPhoto()));
         // 证件类型
         info.put("CardType", 0);
         // 证件号 暂存卡号
@@ -197,17 +232,40 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
      * @param id
      */
     @Override
-    public void addUser(int id) {
+    public void addUser(int id, String deviceIds) {
         CustomerBasicModel model = customerBasicModelMapper.selectByPrimaryKey(id);
-        String deviceIds = env.getProperty("facedevice.deviceIds", String.class);
         String topic = env.getProperty("mqtt.topic");
         if (deviceIds != null && deviceIds.split(",").length > 0) {
             String[] devices = deviceIds.split(",");
             for (String deviceId: devices) {
-                MqttUtil.publish(topic + deviceId, calData(model));
+                MqttUtil.publish(topic + deviceId, calData(model, "EditPerson"));
             }
         }
 
 
+    }
+
+    @Override
+    public void deleteUser(int id, String deviceIds) {
+        CustomerBasicModel model = customerBasicModelMapper.selectByPrimaryKey(id);
+        String topic = env.getProperty("mqtt.topic");
+        if (deviceIds != null && deviceIds.split(",").length > 0) {
+            String[] devices = deviceIds.split(",");
+            for (String deviceId: devices) {
+                MqttUtil.publish(topic + deviceId, calData(model, "DelPerson"));
+            }
+        }
+    }
+
+    @Override
+    public void deleteAllUser(String deviceIds) {
+        CustomerBasicModel model = new CustomerBasicModel();
+        String topic = env.getProperty("mqtt.topic");
+        if (deviceIds != null && deviceIds.split(",").length > 0) {
+            String[] devices = deviceIds.split(",");
+            for (String deviceId: devices) {
+                MqttUtil.publish(topic + deviceId, calData(model, "DeleteAllPerson"));
+            }
+        }
     }
 }

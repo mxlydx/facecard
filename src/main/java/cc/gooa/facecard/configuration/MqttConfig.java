@@ -23,17 +23,18 @@ public class MqttConfig {
     public MqttClient mqttClient() {
         logger.info("start connect mqtt");
         int reconnect = env.getProperty("facecard.reconnect", Integer.class);
+        MqttConnectOptions options = this.mqttConnectOptions();
+        MqttConfiguration mqttConfiguration = this.loadMqttConfiguration();
         try {
-            MqttConnectOptions options = this.mqttConnectOptions();
-            MqttConfiguration mqttConfiguration = this.loadMqttConfiguration();
             MqttClient  client = new MqttClient(mqttConfiguration.getHost(), mqttConfiguration.getClientId(), new MemoryPersistence());
             options.setKeepAliveInterval(20);
             client.setCallback(new PushCallback());
             client.connect(options);
+            client.subscribe("mybroker/clients/#");
             return  client;
         } catch (MqttException e) {
             try {
-                logger.info("连接mqtt失败," + reconnect + "s后尝试重新连接");
+                logger.info("connect to "+ mqttConfiguration.getHost() +"mqtt failed," + reconnect + "s later try to reconnect");
                 Thread.sleep(reconnect * 1000);
                 return this.mqttClient();
             } catch (Exception e1) {

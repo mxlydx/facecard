@@ -1,7 +1,7 @@
 server:                                     # 系统配置
   port: 8088                                # 端口
 mqtt:
-  host: tcp://127.0.0.1:61613               # mqtt服务地址
+  host: tcp://172.18.177.199:61613               # mqtt服务地址
   clientId: gooa.cc.facecard                # 本服务的mqtt客户端id
   topic: mqtt/face/                         # 下发名单的mqtt主题
   username: admin                           # mqtt连接用户名
@@ -32,11 +32,10 @@ facedevice:                                 # 人脸识别设备服务
     subscribe: Subscribe                    # 数据订阅
     heartbeat: HeartBeat                    # 心跳
     addperson: AddPerson                    # 添加单个用户
-  deviceIds: 1305433,1305434
 spring:
   datasource:
     name: dev
-    url: jdbc:mysql://admin.ailong8.com:3306/xxpx?serverTimezone=GMT%2B8
+    url: jdbc:mysql://172.18.177.199:3306/xxpx?serverTimezone=GMT%2B8
     type: com.alibaba.druid.pool.DruidDataSource
     username: xxpx
     password: xxpx4306
@@ -58,11 +57,11 @@ spring:
     # redis数据库索引（默认为0），我们使用索引为3的数据库，避免和其他数据库冲突
     database: 3
     # redis服务器地址（默认为localhost）
-    host: 127.0.0.1
+    host: redis
     # redis端口（默认为6379）
     port: 6379
     # redis访问密码（默认为空）
-    password: 123456
+    password:
     # redis连接超时时间（单位为毫秒）
     timeout: 5000
 mybatis:

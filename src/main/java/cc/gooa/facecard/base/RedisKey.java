@@ -2,7 +2,9 @@ package cc.gooa.facecard.base;
 
 public enum RedisKey {
 
-    SYNOED_IDS("synoed_ids:");
+    SYNOED_IDS("synchronized:id:"),
+    CACHE_DEVICE_ID("cache:device:id:"),
+    CACHE_DEVICE_ONLINE("cache:device:online:id:");
 
     private String key;
 

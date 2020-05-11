@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
 
 /**
  * @author BillM
@@ -60,5 +65,38 @@ public class RequestFaceServer {
                     String credential = Credentials.basic(user, pass);
                     return response.request().newBuilder().header("Authorization", credential).build();
                 }).build();
+    }
+
+    /**
+     * 传入需要连接的IP，返回是否连接成功
+     *
+     * @param remoteInetAddr
+     * @return
+     */
+    public static boolean isReachable(String remoteInetAddr) {// IP地址是否可达，相当于Ping命令
+        boolean reachable = false;
+        try {
+            InetAddress address = InetAddress.getByName(remoteInetAddr);
+            reachable = address.isReachable(1500);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return reachable;
+    }
+
+    public static boolean isHostConnectable(String host, int port) {
+        Socket socket = new Socket();
+        try {
+            socket.connect(new InetSocketAddress(host, port));
+        } catch (IOException e) {
+            return false;
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
 }

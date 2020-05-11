@@ -32,7 +32,6 @@ facedevice:                                 # 人脸识别设备服务
     subscribe: Subscribe                    # 数据订阅
     heartbeat: HeartBeat                    # 心跳
     addperson: AddPerson                    # 添加单个用户
-  deviceIds: 1305433,1305434
 spring:
   datasource:
     name: dev

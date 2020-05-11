@@ -96,6 +96,18 @@
             <groupId>org.springframework.integration</groupId>
             <artifactId>spring-integration-mqtt</artifactId>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.directory.studio/org.apache.commons.codec -->
+        <dependency>
+            <groupId>org.apache.directory.studio</groupId>
+            <artifactId>org.apache.commons.codec</artifactId>
+            <version>1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>cc.gooa</groupId>
+            <artifactId>cc.gooa</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -113,6 +125,35 @@
                     <overwrite>true</overwrite>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                    <!--配置本地jar包在项目的存放路径-->
+                    <compilerArguments>
+                        <extdirs>${project.basedir}/lib</extdirs>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-war-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <webResources>-->
+<!--                        <resource>-->
+<!--                            &lt;!&ndash;配置本地jar包在项目中的存放路径&ndash;&gt;-->
+<!--                            <directory>lib/</directory>-->
+<!--                            &lt;!&ndash;配置打包时jar包的存放路径&ndash;&gt;-->
+<!--                            <targetPath>target/</targetPath>-->
+<!--                            <includes>-->
+<!--                                <include>**/*.jar</include>-->
+<!--                            </includes>-->
+<!--                        </resource>-->
+<!--                    </webResources>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
