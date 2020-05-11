@@ -18,7 +18,7 @@
 
     打包： mvn clean package -Dmaven.test.skip=true
     bin目录下依次执行 
-    1.application.yml 确保配置文件切换到pro
-    2、build.sh
-    3、build_docker_images.sh
+    1. application.yml 确保配置文件切换到pro
+    2. build.sh
+    3.build_docker_images.sh
     
