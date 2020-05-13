@@ -40,8 +40,8 @@
     b.card
     from b_customer_basic a
     left join b_busi_cards b
-    on a.code = b.customerCode
-    where b.status = 1 and  a.id = #{id,jdbcType=INTEGER}
+    on a.code = b.customerCode and b.status = 1
+    where a.id = #{id,jdbcType=INTEGER}
   </select>
   <select id="selectAll" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
     select
@@ -53,10 +53,10 @@
     from b_customer_basic a
     left join b_busi_cards b
     on a.code = b.customerCode
+    and b.status = 1
     where a.`status` = 1
     and a.schoolId = #{param3, jdbcType=INTEGER}
     and  a.photo is not null
-    and b.status = 1
     limit #{param1,jdbcType=INTEGER}
     offset #{param2,jdbcType=INTEGER}
   </select>

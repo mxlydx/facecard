@@ -15,6 +15,7 @@ public class MqttUtil {
      * @param pushMessage
      */
     public static void publish(String topic, String pushMessage) {
+        logger.info(pushMessage);
         publish(2, false, topic, pushMessage);
     }
 

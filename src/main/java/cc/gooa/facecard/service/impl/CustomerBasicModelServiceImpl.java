@@ -267,7 +267,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
     private String reverse(String hex) {
         System.out.println(hex);
         if (hex == null) {
-            return  hex;
+            return  "";
         }
         hex = Long.toHexString(Long.parseLong(hex));
         System.out.println(hex);
