@@ -37,7 +37,7 @@ public class SubscribedDataController {
         bean.setDevicecode(json.getString("DeviceID"));
         String base64 = toData.getString("SanpPic");
         if (base64 != null) {
-            base64 = base64.substring(base64.indexOf(",") + 1 , base64.length() - 1);
+            base64 = base64.substring(base64.indexOf(",") + 1 );
             if (Base64.isBase64(base64))
              bean.setPict(Base64.decodeBase64(base64));
         }

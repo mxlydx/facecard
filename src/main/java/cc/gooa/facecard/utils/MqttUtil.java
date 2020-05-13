@@ -1,10 +1,7 @@
 package cc.gooa.facecard.utils;
 
 import cc.gooa.facecard.SpringContext;
-import cc.gooa.facecard.base.MqttConfiguration;
-import cc.gooa.facecard.service.impl.PushCallback;
 import org.eclipse.paho.client.mqttv3.*;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

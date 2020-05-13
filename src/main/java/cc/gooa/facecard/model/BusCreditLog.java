@@ -1,6 +1,7 @@
 package cc.gooa.facecard.model;
 
 import java.util.Date;
+import java.util.Stack;
 
 public class BusCreditLog {
     private Integer id;
@@ -92,4 +93,5 @@ public class BusCreditLog {
     public void setPict(byte[] pict) {
         this.pict = pict;
     }
+
 }

@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 
 import org.apache.commons.codec.binary.Base64;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.Stack;
 
 
 @Service
@@ -38,13 +40,15 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
     private RequestFaceServer requestFaceServer;
     @Autowired
     private FaceServerLinkService faceServerLinkService;
+    @Resource
+    private OnOffCache onOffCache;
 
 
     @Override
     @Async("asyncExecutor")
     public void pushDataBySchool(int schoolId, String deviceId) {
         long start = System.currentTimeMillis();
-        int all = customerBasicModelMapper.selectCountAll();
+        int all = customerBasicModelMapper.selectCountAllBySchoolId(schoolId);
         long countEnd = System.currentTimeMillis();
         logger.info("计数用时：" + (countEnd - start) / 1000 + "s");
         int pageSize = Integer.parseInt(env.getProperty("facecard.synoNum")); // 单页数据量
@@ -65,27 +69,13 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
                     Object value = RedisUtil.getValue(key);
                     if ( value == null) {
                         logger.info("同步id：【" + model.getId() + "】——【" + model.getName() + "】ing...");
-                        boolean online = RequestFaceServer.isHostConnectable("192.168.2.10", 80);
-                        if (online) {
-                            MqttUtil.publish(topic + deviceId, calData(model, "EditPerson"));
-                        } else {
-                            while (!online) {
-                                logger.info(deviceId + "is offline, waiting it restart");
-                                Thread.sleep(20000);
-                                online = RequestFaceServer.isReachable("192.168.2.10");
-                            }
-                            MqttUtil.publish(topic + deviceId, calData(model, "EditPerson"));
-                        }
-
+                        MqttUtil.publish(topic + deviceId, calData(model, "EditPerson"));
                     } else {
                         logger.info("id：【" + model.getId() + "】——【" + model.getName() + "】has posted now skip!!! ");
                     }
                 } catch (RedisCommandTimeoutException exception) {
                     exception.printStackTrace();
                     logger.info("Can't connect to Redis...");
-                }catch (InterruptedException iException) {
-                    iException.printStackTrace();
-                    logger.info("Thread was Interrupted");
                 }
             }
         }
@@ -115,12 +105,12 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
             gender = 1;
         }
         if ("Man".equals(model.getName())) {
-            model.setCard("0000000");
+           model.setCard("382248084");
         }
         MqttUserInfo user = null;
         switch (operator) {
             case "EditPerson":
-                user = new MqttUserInfo(model.getCode(), model.getName(), gender, Base64.encodeBase64String(model.getPhoto()), model.getCard());
+                user = new MqttUserInfo(model.getCode(), model.getName(), gender, Base64.encodeBase64String(model.getPhoto()), this.reverse(model.getCard()));
                 break;
             case "DelPerson":
                 user = new MqttUserInfo();
@@ -132,7 +122,7 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
         }
         message.setInfo(user);
         message.setOperator(operator);
-        return JSONObject.toJSONString(message);
+        return JSONObject.toJSONString(message,false);
     }
 
 
@@ -268,4 +258,45 @@ public class CustomerBasicModelServiceImpl implements CustomerBasicModelService 
             }
         }
     }
+
+    /**
+     * 10位卡号16进制反转后传给设备
+     * @param hex
+     * @return
+     */
+    private String reverse(String hex) {
+        System.out.println(hex);
+        if (hex == null) {
+            return  hex;
+        }
+        hex = Long.toHexString(Long.parseLong(hex));
+        System.out.println(hex);
+        char[] chars = hex.toCharArray();
+        Stack<String> stack = new Stack<String>();
+        if (chars.length %  2 == 0) {
+            for (int i = 0; i < chars.length; i++) {
+                if (i %  2 == 0) {
+                    String seg = chars[i] + "" + chars[ i + 1];
+                    stack.push(seg);
+                }
+            }
+        } else {
+            for (int i = 0; i < chars.length; i++) {
+                if (i %  2 == 0 && i < chars.length - 1) {
+                    String seg = chars[i] + "" + chars[ i + 1];
+                    stack.push(seg);
+                } else if (i == chars.length - 1) {
+                    String seg = chars[i] + "";
+                    stack.push(seg);
+                }
+            }
+        }
+
+        String result = "";
+        while (!stack.empty()) {
+            result += stack.pop();
+        }
+        return result.toUpperCase();
+    }
+
 }

@@ -24,6 +24,7 @@ public interface CustomerBasicModelMapper {
     List<CustomerBasicModel> selectAll(int limit, int offset, int schoolId);
 
     int selectCountAll();
+    int selectCountAllBySchoolId(int schoolId);
 
     List<CustomerBasicModel> selectMan();
 }

@@ -36,8 +36,12 @@
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
+    ,
+    b.card
     from b_customer_basic a
-    where id = #{id,jdbcType=INTEGER}
+    left join b_busi_cards b
+    on a.code = b.customerCode
+    where b.status = 1 and  a.id = #{id,jdbcType=INTEGER}
   </select>
   <select id="selectAll" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
     select
@@ -52,6 +56,7 @@
     where a.`status` = 1
     and a.schoolId = #{param3, jdbcType=INTEGER}
     and  a.photo is not null
+    and b.status = 1
     limit #{param1,jdbcType=INTEGER}
     offset #{param2,jdbcType=INTEGER}
   </select>
@@ -72,6 +77,12 @@
     select
     count(1)
     from b_customer_basic where `status` = 1 and  photo is not null
+  </select>
+  <select id="selectCountAllBySchoolId" parameterType="java.lang.Integer" resultType="int" >
+    select
+    count(1)
+    from b_customer_basic where `status` = 1 and  photo is not null
+    and schoolId = #{param1,jdbcType=INTEGER}
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">

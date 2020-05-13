@@ -1,7 +1,6 @@
 package cc.gooa.facecard.service.impl;
 
 import cc.gooa.facecard.base.RedisKey;
-import cc.gooa.facecard.mapper.BusDevicesMapper;
 import cc.gooa.facecard.model.BusDevices;
 import cc.gooa.facecard.service.BusDevicesService;
 import cc.gooa.facecard.utils.RedisUtil;

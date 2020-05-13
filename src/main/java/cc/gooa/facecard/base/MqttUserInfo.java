@@ -1,5 +1,7 @@
 package cc.gooa.facecard.base;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 public class MqttUserInfo {
     /**
      * 一体机上的 ID，区分每一个人员
@@ -40,10 +42,15 @@ public class MqttUserInfo {
      */
     private int gender;
     /**
-     * 卡号
+     * 身份证号
      */
     private String idCard;
+    /**
+     * RF卡号
+     */
 
+    @JSONField(name = "RFIDCard")
+    private  String RFIDCard;
     /**
      * 删除所有用户标志
      */
@@ -71,7 +78,7 @@ public class MqttUserInfo {
         this.name = name;
         this.gender = gender;
         this.pic = pic;
-        this.idCard = card;
+        this.RFIDCard = card;
     }
 
     public MqttUserInfo() {
@@ -139,5 +146,13 @@ public class MqttUserInfo {
 
     public void setIdCard(String idCard) {
         this.idCard = idCard;
+    }
+
+    public String getRFIDCard() {
+        return RFIDCard;
+    }
+
+    public void setRFIDCard(String RFIDCard) {
+        this.RFIDCard = RFIDCard;
     }
 }
