@@ -1,8 +1,11 @@
 package cc.gooa.facecard.controller;
 
+import cc.gooa.facecard.base.RedisKey;
 import cc.gooa.facecard.base.SuccessResponse;
 import cc.gooa.facecard.model.BusCreditLog;
 import cc.gooa.facecard.service.BusCreditLogService;
+import cc.gooa.facecard.utils.OkHttpUtil;
+import cc.gooa.facecard.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -14,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.apache.commons.codec.binary.Base64;
+
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,11 +53,39 @@ public class SubscribedDataController {
             logger.error("get ValidBegin to date error ");
         }
         bean.setCredittime(creditTime);
-        bean.setUploadtime(new Date());
+        Date date = new Date();
+        bean.setUploadtime(date);
         bean.setStatus(1);
         JSONObject res = new JSONObject();
         try {
-            busCreditLogService.insert(bean);
+            if (bean.getCustomercode() != null) {
+                busCreditLogService.insert(bean);
+                Object dateObject = RedisUtil.getValue(RedisKey.CACHE_CREDIT_LOG + bean.getCustomercode());
+                Date lastDate = null;
+                if (dateObject != null) {
+                    lastDate = (Date) dateObject;
+                }
+                if (lastDate == null) {
+                    String resp = OkHttpUtil.getJson("http://admin.ailong8.com/send_credit_to_wechat.php?creditId=" + bean.getId());
+                    if (resp != "") {
+                        logger.info("wechat success pushed");
+                    }
+                    RedisUtil.setValue(RedisKey.CACHE_CREDIT_LOG + bean.getCustomercode(), date);
+                    res.put("desc", "OK");
+                    return new SuccessResponse(res).toString();
+                }
+                long mills = date.getTime() - lastDate.getTime();
+                long diff = mills / (1000 * 60 );
+                if ( diff >= 1) {
+                    String resp = OkHttpUtil.getJson("http://admin.ailong8.com/send_credit_to_wechat.php?creditId=" + bean.getId());
+                    if (resp != "") {
+                        logger.info("wechat success pushed");
+                    }
+                    RedisUtil.setValue(RedisKey.CACHE_CREDIT_LOG + bean.getCustomercode(), new Date());
+                }
+
+
+            }
             res.put("desc", "OK");
         } catch (Exception e) {
             e.printStackTrace();

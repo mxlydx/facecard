@@ -34,7 +34,7 @@ public class MqttConfig {
             return  client;
         } catch (MqttException e) {
             try {
-                logger.info("connect to "+ mqttConfiguration.getHost() +"mqtt failed," + reconnect + "s later try to reconnect");
+                logger.info("connect to "+ mqttConfiguration.getHost() +" mqtt failed," + reconnect + "s later try to reconnect");
                 Thread.sleep(reconnect * 1000);
                 return this.mqttClient();
             } catch (Exception e1) {

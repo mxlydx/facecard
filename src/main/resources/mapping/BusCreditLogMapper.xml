@@ -42,7 +42,7 @@
       #{orient,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{pict,jdbcType=LONGVARBINARY}
       )
   </insert>
-  <insert id="insertSelective" parameterType="cc.gooa.facecard.model.BusCreditLog">
+  <insert id="insertSelective" parameterType="cc.gooa.facecard.model.BusCreditLog" useGeneratedKeys="true" keyProperty="id">
     insert into b_busi_credit_log
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">

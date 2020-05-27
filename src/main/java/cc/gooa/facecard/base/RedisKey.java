@@ -4,7 +4,8 @@ public enum RedisKey {
 
     SYNOED_IDS("synchronized:id:"),
     CACHE_DEVICE_ID("cache:device:id:"),
-    CACHE_DEVICE_ONLINE("cache:device:online:id:");
+    CACHE_DEVICE_ONLINE("cache:device:online:id:"),
+    CACHE_CREDIT_LOG("cache:credit:log:");
 
     private String key;
 

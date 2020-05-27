@@ -5,5 +5,7 @@ services:
     command: sh bin/start_from_docker.sh
     ports:
       - "8088:8088"
+    environment:
+      JAVA_ENV: dev
     container_name: facecard
     restart: always

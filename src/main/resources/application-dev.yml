@@ -1,7 +1,7 @@
 server:                                     # 系统配置
   port: 8088                                # 端口
 mqtt:
-  host: tcp://192.168.0.106:61613               # mqtt服务地址
+  host: tcp://192.168.0.107:61613               # mqtt服务地址
   clientId: gooa.cc.facecard                # 本服务的mqtt客户端id
   topic: mqtt/face/                         # 下发名单的mqtt主题
   username: admin                           # mqtt连接用户名
