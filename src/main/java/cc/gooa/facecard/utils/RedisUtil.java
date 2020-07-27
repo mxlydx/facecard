@@ -64,6 +64,17 @@ public class RedisUtil {
 	}
 
 	/**
+	 * 减去key的value
+	 * @param key
+	 * @param num
+	 * @return
+	 */
+	public static long decreaseNum(String key, long num) {
+		ValueOperations<String, Object> valueOP = redisTemplateOb.opsForValue();
+		return valueOP.decrement(key, num);
+	}
+
+	/**
 	 * 设置key失效时间
 	 *
 	 * @param key

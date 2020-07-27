@@ -3,6 +3,7 @@ package cc.gooa.facecard.controller;
 import cc.gooa.facecard.base.BadRequestResponse;
 import cc.gooa.facecard.base.SuccessResponse;
 import cc.gooa.facecard.service.CustomerBasicModelService;
+import cc.gooa.facecard.utils.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class PushUserInfoController {
@@ -58,7 +60,18 @@ public class PushUserInfoController {
         if (deviceIds != null) {
             String[] devices = deviceIds.split(",");
             for (String deviceId : devices) {
-                customerBasicModelService.synoData(false, schoolId, deviceId);
+                // 增加系统正在执行
+               long count =  RedisUtil.increaseNum("sync-task-running-num" + deviceId, 1);
+               // 设置超时时间
+               RedisUtil.expire(deviceId, 2, TimeUnit.HOURS);
+               if (count > 1) {
+                   System.out.println("sync task is running skip：" + deviceId);
+               } else {
+                   customerBasicModelService.synoData(false, schoolId, deviceId);
+                   // 释放锁
+                   RedisUtil.decreaseNum("sync-task-running-num" + deviceId, 1);
+               }
+
             }
         } else {
             return new BadRequestResponse("Param Error").toString();

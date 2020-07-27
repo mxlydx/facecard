@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.apache.commons.codec.binary.Base64;
+import sun.misc.BASE64Decoder;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,10 +41,13 @@ public class SubscribedDataController {
         bean.setCard(json.getString("IdCard"));
         bean.setDevicecode(json.getString("DeviceID"));
         String base64 = toData.getString("SanpPic");
+        logger.info("收到的图片数据："+ base64);
         if (base64 != null) {
             base64 = base64.substring(base64.indexOf(",") + 1 );
+            BASE64Decoder decoder = new BASE64Decoder();
             if (Base64.isBase64(base64))
-             bean.setPict(Base64.decodeBase64(base64));
+                bean.setPict(Base64.decodeBase64(base64));
+//                bean.setPict(decoder.decodeBuffer(base64));
         }
         Date creditTime = new Date();
         try {
